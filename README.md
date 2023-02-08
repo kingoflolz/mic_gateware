@@ -34,7 +34,7 @@ $ sudo ./litex_setup.py init install
 [> Build and Flash the bitstream
 --------------------------------
 ```sh
-$ ./colorlite.py --ip-address=192.168.1.20 --flash
+$ ./mic_hub.py --ip-address=192.168.1.20 --flash
 ```
 
 [> Open LiteX server

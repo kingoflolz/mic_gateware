@@ -86,9 +86,10 @@ class SPIFlash:
 
 spiflash = SPIFlash(wb.regs)
 print("{:08x}".format(spiflash.read_id()))
-
-for i in range(16):
-    print("{:02x}".format(spiflash.read(i)))
+print("{:08x}".format(spiflash.read_sector_lock(0)))
+spiflash.write_enable()
+spiflash.write_sector_lock(0, 0x00)
+print("{:08x}".format(spiflash.read_sector_lock(0)))
 
 # # #
 

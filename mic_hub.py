@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from liteeth.core import LiteEthUDPIPCore
 from migen import *
 from litex.soc.cores.clock import *
 from litex.soc.cores.led import LedChaser
@@ -41,15 +41,27 @@ class MicHub(SoCMini):
             pads       = self.platform.request("eth", 1),
             tx_delay   = 0e-9)
 
-        self.add_etherbone(
-            phy         = self.ethphy,
-            ip_address  = ip_address,
-            mac_address = mac_address,
-            data_width  = 32,
+        self.submodules.ethcore = LiteEthUDPIPCore(
+            phy=self.ethphy,
+            mac_address=mac_address,
+            ip_address=ip_address,
+            clk_freq=self.clk_freq,
+            dw=32,
+            with_ip_broadcast=True,
+            with_sys_datapath=True,
+            with_icmp=False
         )
+
+        # Timing constraints
+        eth_rx_clk = self.ethphy.crg.cd_eth_rx.clk
+        eth_tx_clk = self.ethphy.crg.cd_eth_tx.clk
+        self.platform.add_period_constraint(eth_rx_clk, 1e9 / self.ethphy.rx_clk_freq)
+        self.platform.add_period_constraint(eth_tx_clk, 1e9 / self.ethphy.tx_clk_freq)
+        self.platform.add_false_path_constraints(self.crg.cd_sys.clk, eth_rx_clk, eth_tx_clk)
+
         self.submodules.pdm = PDM(platform.request("pdm_clk"), platform.request("pdm_data"))
 
-        udp_port = self.ethcore_etherbone.udp.crossbar.get_port(port, dw=32)
+        udp_port = self.ethcore.udp.crossbar.get_port(port, dw=32)
 
         udp_streamer = LiteEthPacketStream2UDPTX(
             ip_address=convert_ip(host_ip_address),

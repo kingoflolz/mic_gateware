@@ -47,7 +47,7 @@ class MicHub(SoCMini):
             ip_address=ip_address,
             clk_freq=self.clk_freq,
             dw=32,
-            with_ip_broadcast=True,
+            with_ip_broadcast=False,
             with_sys_datapath=True,
             with_icmp=False
         )
